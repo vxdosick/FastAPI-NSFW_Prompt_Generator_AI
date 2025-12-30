@@ -2,9 +2,11 @@
 from fastapi import FastAPI, Request, HTTPException
 import stripe
 from dotenv import load_dotenv
+from telegram import Bot, Update
 
 import os
 from storage.storage import load_users, save_users
+from bot.bot import dp, bot
 
 # Load dotenv variables
 load_dotenv()
@@ -13,7 +15,7 @@ load_dotenv()
 app = FastAPI()
 
 # Define tokens
-stripe.api_key=os.getenv("STRIPE_TEST_SECRET_KEY")
+stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
 
 # FastAPI Endpoints
 @app.post("/create-checkout-session/{user_id}")
@@ -66,4 +68,11 @@ async def stripe_webhook(request: Request):
         users[telegram_user_id]["credits"] += credits
         save_users(users)
 
+    return {"status": "ok"}
+
+@app.post("/tg-webhook")
+async def telegram_webhook(request: Request):
+    payload = await request.json()
+    update = Update.de_json(payload, bot)
+    dp.process_update(update)
     return {"status": "ok"}

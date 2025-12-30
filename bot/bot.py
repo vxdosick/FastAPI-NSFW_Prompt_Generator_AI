@@ -1,6 +1,7 @@
 # Imports
-from telegram.ext import Application, CommandHandler, MessageHandler, filters
+from telegram.ext import Dispatcher, Application, CommandHandler, MessageHandler, filters
 from telegram.constants import ChatType
+from telegram import Bot
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -16,6 +17,11 @@ from storage.storage import load_users, save_users, START_CREDITS
 
 # Define tokens
 TOKEN = os.getenv("TB_TOKEN")
+
+# Bot creating
+bot = Bot(token=TOKEN)
+
+dp = Dispatcher(bot=bot, update_queue=None, workers=0, use_context=True)
 
 # Functions
 user_last_action = {}
@@ -151,4 +157,5 @@ app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 app.add_handler(MessageHandler(filters.COMMAND, unknown))
 
 # Starting (dev mode)
-app.run_polling()
+# app.run_polling()
+
