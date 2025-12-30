@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException
 from dotenv import load_dotenv
-from telegram import Update
+from telegram import Update, Bot
 import os, stripe
 from storage.storage import load_users, save_users
 from bot.bot import app as tg_app, bot
@@ -15,8 +15,8 @@ stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
 
 # Project initialisation
 async def init_telegram():
+    await bot.initialize()
     await tg_app.initialize()
-    await tg_app.start()
 
 @asynccontextmanager
 async def lifespan(server: FastAPI):
