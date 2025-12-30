@@ -1,27 +1,23 @@
 # Imports
-from telegram.ext import Dispatcher, Application, CommandHandler, MessageHandler, filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram.constants import ChatType
 from telegram import Bot
 from dotenv import load_dotenv
 from openai import OpenAI
-
-import sys
-import os
-import time
-import httpx
+import os, time, httpx, sys
 
 # Dotenv, storage path connecting
 load_dotenv()
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from storage.storage import load_users, save_users, START_CREDITS
 
 # Define tokens
 TOKEN = os.getenv("TB_TOKEN")
 
-# Bot creating
-bot = Bot(token=TOKEN)
-
-dp = Dispatcher(bot=bot, update_queue=None, workers=0, use_context=True)
+# TB App creating
+bot = Bot(TOKEN)
+app = Application.builder().token(TOKEN).build()
 
 # Functions
 user_last_action = {}
@@ -144,9 +140,6 @@ async def echo(update, context):
     elif data.get("status") == "error":
         await update.message.reply_text("!ТУТ БУДЕТ ТЕКСТ ОШИБКИ ЕСЛИ ПОЛЬЗОВАТЕЛЬ НЕ ПОПРОСИЛ ПРОМПТ")
 
-# TB App creating
-app = Application.builder().token(TOKEN).build()
-
 # Define TB handlers
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("help", help))
@@ -158,4 +151,3 @@ app.add_handler(MessageHandler(filters.COMMAND, unknown))
 
 # Starting (dev mode)
 # app.run_polling()
-

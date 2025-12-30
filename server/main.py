@@ -1,24 +1,22 @@
 # Imports
 from fastapi import FastAPI, Request, HTTPException
-import stripe
 from dotenv import load_dotenv
-from telegram import Bot, Update
-
-import os
+from telegram import Update
+import os, stripe
 from storage.storage import load_users, save_users
-from bot.bot import dp, bot
+from bot.bot import app as tg_app, bot
 
 # Load dotenv variables
 load_dotenv()
 
 # FastAPI app creating
-app = FastAPI()
+server = FastAPI()
 
 # Define tokens
 stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
 
 # FastAPI Endpoints
-@app.post("/create-checkout-session/{user_id}")
+@server.post("/create-checkout-session/{user_id}")
 async def create_checkout(user_id: str):
     session = stripe.checkout.Session.create(
         payment_method_types=["card"],
@@ -43,7 +41,7 @@ async def create_checkout(user_id: str):
     )
     return {"url": session.url}
 
-@app.post("/stripe-webhook")
+@server.post("/stripe-webhook")
 async def stripe_webhook(request: Request):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
@@ -70,9 +68,9 @@ async def stripe_webhook(request: Request):
 
     return {"status": "ok"}
 
-@app.post("/tg-webhook")
+@server.post("/tg-webhook")
 async def telegram_webhook(request: Request):
     payload = await request.json()
     update = Update.de_json(payload, bot)
-    dp.process_update(update)
-    return {"status": "ok"}
+    await tg_app.process_update(update)
+    return {"ok": True}
