@@ -16,6 +16,7 @@ stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
 # Project initialisation
 async def init_telegram():
     await tg_app.initialize()
+    await tg_app.start()
 
 @asynccontextmanager
 async def lifespan(server: FastAPI):
