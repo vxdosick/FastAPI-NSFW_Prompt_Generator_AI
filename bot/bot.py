@@ -14,6 +14,7 @@ from storage.storage import load_users, save_users, START_CREDITS
 
 # Define tokens
 TOKEN = os.getenv("TB_TOKEN")
+SERVER_URL = os.getenv('SERVER_URL')
 
 # TB App creating
 bot = Bot(TOKEN)
@@ -66,7 +67,7 @@ async def buy(update, context):
     user_id = str(update.effective_user.id)
 
     async with httpx.AsyncClient() as client:
-        r = await client.post(f"http://localhost:8000/create-checkout-session/{user_id}")
+        r = await client.post(f"{SERVER_URL}/create-checkout-session/{user_id}")
         data = r.json()
         await update.message.reply_text(f"КУПИ 10 КРЕДИТОВ ПУПСИК - {data['url']}")
 
