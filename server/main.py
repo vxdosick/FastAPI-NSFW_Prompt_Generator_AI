@@ -62,10 +62,6 @@ async def stripe_webhook(request: Request):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
-    print("=== WEBHOOK RECEIVED ===")
-    print("Headers:", request.headers)
-    print("Payload length:", len(payload))
-
     try:
         event = stripe.Webhook.construct_event(
             payload,
@@ -76,13 +72,27 @@ async def stripe_webhook(request: Request):
         print("WEBHOOK ERROR:", e)
         raise HTTPException(status_code=400)
 
-    if event["type"] == "payment_intent.succeeded":
-        pi = event["data"]["object"]
+    print("EVENT TYPE:", event["type"])
 
-        telegram_user_id = pi["metadata"].get("telegram_user_id")
-        credits = int(pi["metadata"].get("credits", 0))
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+
+        payment_intent_id = session.get("payment_intent")
+        if not payment_intent_id:
+            print("NO PAYMENT INTENT")
+            return {"status": "ok"}
+
+        pi = stripe.PaymentIntent.retrieve(payment_intent_id)
+        metadata = pi.get("metadata", {})
+
+        telegram_user_id = metadata.get("telegram_user_id")
+        credits = int(metadata.get("credits", 0))
 
         print("PAYMENT OK:", telegram_user_id, credits)
+
+        if not telegram_user_id or credits <= 0:
+            print("INVALID METADATA")
+            return {"status": "ok"}
 
         users = load_users()
         users.setdefault(telegram_user_id, {"credits": 0})
