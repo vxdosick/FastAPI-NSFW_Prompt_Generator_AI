@@ -11,7 +11,7 @@ from bot.bot import app as tg_app, bot
 load_dotenv()
 
 # Define tokens
-stripe.api_key=os.getenv("STRIPE_TEST_SECRET_KEY")
+stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
 
 # Project initialisation
 async def init_telegram():
@@ -70,28 +70,24 @@ async def stripe_webhook(request: Request):
         event = stripe.Webhook.construct_event(
             payload,
             sig_header,
-            os.getenv("STRIPE_TEST_WEBHOOK_SECRET")
+            os.getenv("STRIPE_WEBHOOK_SECRET")
         )
-        print("EVENT TYPE:", event["type"])
-        print("EVENT DATA KEYS:", list(event["data"]["object"].keys()))
-        print("METADATA:", event["data"]["object"].get("metadata"))
-    except stripe.error.SignatureVerificationError as e:
-        print("SIGNATURE ERROR:", e)
-        raise HTTPException(status_code=400, detail="Invalid signature")
-    
-    if event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        payment_intent_id = session["payment_intent"]
-        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+    except Exception as e:
+        print("WEBHOOK ERROR:", e)
+        raise HTTPException(status_code=400)
 
-        telegram_user_id = payment_intent.metadata["telegram_user_id"]
-        credits = int(payment_intent.metadata["credits"])
+    if event["type"] == "payment_intent.succeeded":
+        pi = event["data"]["object"]
+
+        telegram_user_id = pi["metadata"].get("telegram_user_id")
+        credits = int(pi["metadata"].get("credits", 0))
+
+        print("PAYMENT OK:", telegram_user_id, credits)
 
         users = load_users()
         users.setdefault(telegram_user_id, {"credits": 0})
         users[telegram_user_id]["credits"] += credits
         save_users(users)
-        print(f"Credits added: {credits} to user {telegram_user_id}")
 
     return {"status": "ok"}
 
