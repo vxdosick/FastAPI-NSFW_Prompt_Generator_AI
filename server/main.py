@@ -11,7 +11,7 @@ from bot.bot import app as tg_app, bot
 load_dotenv()
 
 # Define tokens
-stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
+stripe.api_key=os.getenv("STRIPE_TEST_SECRET_KEY")
 
 # Project initialisation
 async def init_telegram():
@@ -43,42 +43,61 @@ async def create_checkout(user_id: str):
         }],
         mode="payment",
         # save user information
-        metadata={
+        payment_intent_data= {
+            "metadata": {
             "telegram_user_id": user_id,
-            "credits": "5"
+            "credits": "10"
+            },
         },
         success_url="https://t.me/nsfw_prompt_generator_bot?start=payment_success",
         cancel_url="https://t.me/nsfw_prompt_generator_bot?start=payment_cancel"
     )
     return {"url": session.url}
 
+# ------------------------------
+# Stripe webhook
+# ------------------------------
 @server.post("/stripe-webhook")
 async def stripe_webhook(request: Request):
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
 
+    print("=== WEBHOOK RECEIVED ===")
+    print("Headers:", request.headers)
+    print("Payload length:", len(payload))
+
     try:
         event = stripe.Webhook.construct_event(
             payload,
             sig_header,
-            os.getenv("STRIPE_WEBHOOK_SECRET")
+            os.getenv("STRIPE_TEST_WEBHOOK_SECRET")
         )
-    except stripe.error.SignatureVerificationError:
+        print("EVENT TYPE:", event["type"])
+        print("EVENT DATA KEYS:", list(event["data"]["object"].keys()))
+        print("METADATA:", event["data"]["object"].get("metadata"))
+    except stripe.error.SignatureVerificationError as e:
+        print("SIGNATURE ERROR:", e)
         raise HTTPException(status_code=400, detail="Invalid signature")
     
     if event["type"] == "checkout.session.completed":
         session = event["data"]["object"]
-        telegram_user_id = session["metadata"]["telegram_user_id"]
-        credits = int(session["metadata"]["credits"])
+        payment_intent_id = session["payment_intent"]
+        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+
+        telegram_user_id = payment_intent.metadata["telegram_user_id"]
+        credits = int(payment_intent.metadata["credits"])
 
         users = load_users()
-        if telegram_user_id not in users:
-            users[telegram_user_id] = {"credits": 0}
+        users.setdefault(telegram_user_id, {"credits": 0})
         users[telegram_user_id]["credits"] += credits
         save_users(users)
+        print(f"Credits added: {credits} to user {telegram_user_id}")
 
     return {"status": "ok"}
 
+# ------------------------------
+# Telegram webhook
+# ------------------------------
 @server.post("/tg-webhook")
 async def telegram_webhook(request: Request):
     payload = await request.json()
