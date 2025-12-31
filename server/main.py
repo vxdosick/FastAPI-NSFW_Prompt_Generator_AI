@@ -70,7 +70,7 @@ async def stripe_webhook(request: Request):
         event = stripe.Webhook.construct_event(
             payload,
             sig_header,
-            os.getenv("STRIPE_WEBHOOK_SECRET")
+            os.getenv("STRIPE_LIVE_WEBHOOK_SECRET")
         )
     except Exception as e:
         print("WEBHOOK ERROR:", e)
