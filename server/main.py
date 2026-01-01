@@ -6,6 +6,11 @@ from telegram import Update, Bot
 import os, stripe
 from storage.storage import load_users, save_users
 from bot.bot import app as tg_app, bot
+from storage.database import engine
+from storage.models import Base
+
+# PostgreSQL db table creating
+Base.metadata.create_all(bind=engine)
 
 # Load dotenv variables
 load_dotenv()
