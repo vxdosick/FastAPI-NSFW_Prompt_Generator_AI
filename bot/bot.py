@@ -115,6 +115,7 @@ async def buy(update, context):
         r = await client.post(f"{SERVER_URL}/create-checkout-session/{user_id}")
         data = r.json()
         await update.message.reply_text(
+            (
             f"Ready to unlock more spicy generations? 😏🔥\n\n"
             f"One simple purchase — no subscriptions, no hidden fees, no monthly traps.\n"
             f"Everything is transparent and honest 💎\n\n"
@@ -123,7 +124,10 @@ async def buy(update, context):
             f"Pay once → instantly get your 10 generations added.\n"
             f"As simple as that!\n\n"
             f"<a href='{data['url']}'>🛒 Grab 10 generations for €1.99 now!</a>\n\n"
-            f"Let's keep the creativity flowing! 💦")
+            f"Let's keep the creativity flowing! 💦"
+            ),
+            parse_mode="HTML",
+            disable_web_page_preview=True)
 
 async def unknown(update, context):
     if update.effective_chat.type != ChatType.PRIVATE:
