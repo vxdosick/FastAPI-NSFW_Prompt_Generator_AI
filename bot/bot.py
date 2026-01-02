@@ -180,7 +180,7 @@ async def echo(update, context):
         )
         completion = client.chat.completions.create(
             extra_body={},
-            model="openai/gpt-4o-mini",
+            model="x-ai/grok-4-fast",
             messages = [
                 {
                     "role": "user",
