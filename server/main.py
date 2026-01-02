@@ -4,7 +4,8 @@ from fastapi import FastAPI, Request, HTTPException
 from dotenv import load_dotenv
 from telegram import Update, Bot
 import os, stripe
-from storage.storage import load_users, save_users
+from storage.db_ops import get_or_create_user, add_credits
+from storage.database import SessionLocal
 from bot.bot import app as tg_app, bot
 from storage.database import engine
 from storage.models import Base
@@ -40,7 +41,7 @@ async def create_checkout(user_id: str):
             "price_data": {
                 "currency": "eur",
                 "product_data": {
-                    "name": "10 Credits",
+                    "name": "30 Generations 🤗",
                 },
                 "unit_amount": 50,
             },
@@ -51,7 +52,7 @@ async def create_checkout(user_id: str):
         payment_intent_data= {
             "metadata": {
             "telegram_user_id": user_id,
-            "credits": "10"
+            "credits": "30"
             },
         },
         success_url="https://t.me/nsfw_prompt_generator_bot?start=payment_success",
@@ -98,11 +99,14 @@ async def stripe_webhook(request: Request):
         if not telegram_user_id or credits <= 0:
             print("INVALID METADATA")
             return {"status": "ok"}
+        
+        db = SessionLocal()
+        try:
+            get_or_create_user(telegram_user_id, db)
 
-        users = load_users()
-        users.setdefault(telegram_user_id, {"credits": 0})
-        users[telegram_user_id]["credits"] += credits
-        save_users(users)
+            add_credits(telegram_user_id, credits, db)
+        finally:
+            db.close()
 
     return {"status": "ok"}
 
