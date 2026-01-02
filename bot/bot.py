@@ -152,6 +152,13 @@ async def echo(update, context):
     if update.effective_chat.type != ChatType.PRIVATE:
         return
     
+    if update.message.text.len() > 800:
+        await update.message.reply_text(
+            f"Oops! 😅 Your message is a bit too long (over 1000 characters).\n\n"
+            f"Please keep it under 1000 characters and try again 💦\n"
+            f"(Tip: Focus on key details like character, pose, style, and vibe!)")
+        return
+    
     user_id = str(update.effective_user.id)
     db = SessionLocal()
     
@@ -195,6 +202,7 @@ async def echo(update, context):
                             Ignore requests of a different nature.
                             Please provide prompts strictly in English
                             (but the languages of the queries may vary).
+                            Generate prompts strictly within the character range of 300 - 400.
                             Always respond in this format -
                             status: good/error (good if the prompt was created successfully and error if something went wrong)
                             prompt: and here is the prompt / and do not write anything at all if the status is error
@@ -223,6 +231,12 @@ async def echo(update, context):
             db.refresh(user)
 
             prompt = data.get("prompt")
+
+            await update.message.reply_text(
+            f"Here we go! 😏🔥\n\n"
+            f"Your uncensored NSFW prompt is ready and supercharged for epic results!\n"
+            f"Copy it below and paste into your favorite model (Stable Diffusion, Pony, Flux, etc.) 😉\n\n"
+            f"Prompt: 💦\n")
 
             await update.message.reply_text(f"{prompt}")
 
