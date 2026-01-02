@@ -152,7 +152,7 @@ async def echo(update, context):
     if update.effective_chat.type != ChatType.PRIVATE:
         return
     
-    if update.message.text.len() > 800:
+    if len(update.message.text) > 800:
         await update.message.reply_text(
             f"Oops! 😅 Your message is a bit too long (over 1000 characters).\n\n"
             f"Please keep it under 1000 characters and try again 💦\n"
