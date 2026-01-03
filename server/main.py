@@ -7,6 +7,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from telegram import Update
 import os, stripe
+from pathlib import Path
 from storage.db_ops import get_or_create_user, add_credits
 from storage.database import SessionLocal
 from bot.bot import app as tg_app, bot
@@ -35,9 +36,12 @@ async def lifespan(server: FastAPI):
 # FastAPI server creating
 server = FastAPI(lifespan=lifespan)
 
+# /server folder
+BASE_DIR = Path(__file__).resolve().parent
+
 # HTML tenplates and static files connecting
 templates = Jinja2Templates(directory="templates")
-server.mount("/static", StaticFiles(directory="static"), name="static")
+server.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 # FastAPI Endpoints
 @server.get("/privacy-policy", response_class=HTMLResponse)
