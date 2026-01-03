@@ -139,11 +139,15 @@ async def terms(update, context):
         return
     
     await update.message.reply_text(
+    (
     f"Terms & Policies 😇\n\n"
     f"Everything is simple and transparent:\n"
     f"• No subscriptions — pay only for what you use\n"
     f"• Instant delivery of generations after payment\n"
-    f"<a href=\"https://ai-prompt-generator-telegram-bot-server.onrender.com/privacy-policy\">Privacy Policy and Refund Policy</a>\n")
+    f"<a href=\"https://ai-prompt-generator-telegram-bot-server.onrender.com/privacy-policy\">Privacy Policy and Refund Policy</a>\n"),
+    parse_mode="HTML",
+    disable_web_page_preview=True
+    )
 
 async def unknown(update, context):
     if update.effective_chat.type != ChatType.PRIVATE:
