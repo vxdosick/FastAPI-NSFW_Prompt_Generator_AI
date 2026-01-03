@@ -1,8 +1,11 @@
 # Imports
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, HTTPException
 from dotenv import load_dotenv
-from telegram import Update, Bot
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from telegram import Update
 import os, stripe
 from storage.db_ops import get_or_create_user, add_credits
 from storage.database import SessionLocal
@@ -32,7 +35,18 @@ async def lifespan(server: FastAPI):
 # FastAPI server creating
 server = FastAPI(lifespan=lifespan)
 
+# HTML tenplates and static files connecting
+templates = Jinja2Templates(directory="templates")
+server.mount("/static", StaticFiles(directory="static"), name="static")
+
 # FastAPI Endpoints
+@server.get("/privacy-policy", response_class=HTMLResponse)
+async def privacy_policy(request: Request):
+    return templates.TemplateResponse(
+        "privacy_policy.html",
+        {"request": request}
+    )
+
 @server.post("/create-checkout-session/{user_id}")
 async def create_checkout(user_id: str):
     session = stripe.checkout.Session.create(

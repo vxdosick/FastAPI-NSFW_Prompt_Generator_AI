@@ -133,10 +133,22 @@ async def buy(update, context):
             ),
             parse_mode="HTML",
             disable_web_page_preview=True)
+        
+async def terms(update, context):
+    if update.effective_chat.type != ChatType.PRIVATE:
+        return
+    
+    await update.message.reply_text(
+    f"Terms & Policies 😇\n\n"
+    f"Everything is simple and transparent:\n"
+    f"• No subscriptions — pay only for what you use\n"
+    f"• Instant delivery of generations after payment\n"
+    f"<a href=\"https://ai-prompt-generator-telegram-bot-server.onrender.com/privacy-policy\">Privacy Policy and Refund Policy</a>\n")
 
 async def unknown(update, context):
     if update.effective_chat.type != ChatType.PRIVATE:
         return
+    
     await update.message.reply_text(
         f"Oops! 😅 That command doesn't exist yet.\n\n"
         f"Try one of these:\n"
@@ -154,8 +166,8 @@ async def echo(update, context):
     
     if len(update.message.text) > 800:
         await update.message.reply_text(
-            f"Oops! 😅 Your message is a bit too long (over 1000 characters).\n\n"
-            f"Please keep it under 1000 characters and try again 💦\n"
+            f"Oops! 😅 Your message is a bit too long (over 800 characters).\n\n"
+            f"Please keep it under 800 characters and try again 💦\n"
             f"(Tip: Focus on key details like character, pose, style, and vibe!)")
         return
     
@@ -255,6 +267,7 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("help", help))
 app.add_handler(CommandHandler("credits", credits))
 app.add_handler(CommandHandler("buy", buy))
+app.add_handler(CommandHandler("terms", terms))
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
 # (always in the end)
 app.add_handler(MessageHandler(filters.COMMAND, unknown))
