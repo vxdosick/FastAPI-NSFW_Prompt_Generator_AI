@@ -156,6 +156,7 @@ async def unknown(update, context):
         f"/help — How to use me\n"
         f"/credits — Check free generations left\n"
         f"/buy — Get more generations (€1.99 for 30)\n\n"
+        f"/terms — Terms & Policies\n\n"
         f"Or just describe your fantasy — I'll create a hot prompt right away! 🔥💦")
 
 # Requests (text in telegram)
