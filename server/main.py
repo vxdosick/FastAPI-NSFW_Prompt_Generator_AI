@@ -37,11 +37,11 @@ async def lifespan(server: FastAPI):
 server = FastAPI(lifespan=lifespan)
 
 # /server folder
-BASE_DIR = Path(__file__).resolve().parent
+# BASE_DIR = Path(__file__).resolve().parent
 
 # HTML tenplates and static files connecting
-templates = Jinja2Templates(directory=BASE_DIR / "templates")
-server.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
+templates = Jinja2Templates(directory="server/templates")
+server.mount("/static", StaticFiles(directory="server/static"), name="static")
 
 # FastAPI Endpoints
 @server.get("/privacy-policy", response_class=HTMLResponse)
