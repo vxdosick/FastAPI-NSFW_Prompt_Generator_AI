@@ -40,7 +40,7 @@ server = FastAPI(lifespan=lifespan)
 BASE_DIR = Path(__file__).resolve().parent
 
 # HTML tenplates and static files connecting
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=BASE_DIR / "templates")
 server.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 # FastAPI Endpoints
