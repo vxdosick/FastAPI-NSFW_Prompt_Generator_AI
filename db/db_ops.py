@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from .database import SessionLocal
-from .models import User
+from db.database import SessionLocal
+from db.models import User
 
 # Variables
 START_CREDITS = 5

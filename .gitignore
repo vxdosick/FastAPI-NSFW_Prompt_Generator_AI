@@ -1,13 +1,34 @@
+
+/db/storage/data.db
+
 venv/
+.env/
+.env.*
+.env
 
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+
 
 *.log
 
-.env
 
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
+
+
+.DS_Store
+Thumbs.db
+
+
+.ipynb_checkpoints/
+
+
+*.egg-info/
+dist/
+build/
+.eggs/
+pip-wheel-metadata/

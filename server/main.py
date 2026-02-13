@@ -1,27 +1,20 @@
 # Imports
 from contextlib import asynccontextmanager
-from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from telegram import Update
-import os, stripe
-from pathlib import Path
-from storage.db_ops import get_or_create_user, add_credits
-from storage.database import SessionLocal
+import stripe
+from db.db_ops import get_or_create_user, add_credits
+from db.database import SessionLocal
 from bot.bot import app as tg_app, bot
-from storage.database import engine
-from storage.models import Base
-
-# PostgreSQL db table creating
-Base.metadata.create_all(bind=engine)
-
-# Load dotenv variables
-load_dotenv()
+from db.database import engine
+from db.models import Base
 
 # Define tokens
-stripe.api_key=os.getenv("STRIPE_LIVE_SECRET_KEY")
+from core.config import STRIPE_LIVE_SECRET_KEY
+stripe.api_key = STRIPE_LIVE_SECRET_KEY
 
 # Project initialisation
 async def init_telegram():
@@ -30,14 +23,13 @@ async def init_telegram():
 
 @asynccontextmanager
 async def lifespan(server: FastAPI):
+    # SQLite db table creating
+    Base.metadata.create_all(bind=engine)
     await init_telegram()
     yield
 
 # FastAPI server creating
 server = FastAPI(lifespan=lifespan)
-
-# /server folder
-# BASE_DIR = Path(__file__).resolve().parent
 
 # HTML tenplates and static files connecting
 templates = Jinja2Templates(directory="server/templates")
@@ -59,7 +51,7 @@ async def create_checkout(user_id: str):
             "price_data": {
                 "currency": "eur",
                 "product_data": {
-                    "name": "30 Generations 🤗",
+                    "name": "50 Generations 🤗",
                 },
                 "unit_amount": 50,
             },
@@ -70,7 +62,7 @@ async def create_checkout(user_id: str):
         payment_intent_data= {
             "metadata": {
             "telegram_user_id": user_id,
-            "credits": "30"
+            "credits": "50"
             },
         },
         success_url="https://t.me/nsfw_prompt_generator_bot?start=payment_success",
@@ -90,7 +82,7 @@ async def stripe_webhook(request: Request):
         event = stripe.Webhook.construct_event(
             payload,
             sig_header,
-            os.getenv("STRIPE_LIVE_WEBHOOK_SECRET")
+            STRIPE_LIVE_SECRET_KEY
         )
     except Exception as e:
         print("WEBHOOK ERROR:", e)

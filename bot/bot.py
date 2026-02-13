@@ -1,39 +1,24 @@
-# Imports
 from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram.constants import ChatType
 from telegram import Bot
-from dotenv import load_dotenv
 from openai import OpenAI
-from storage.db_ops import get_or_create_user
-from storage.database import SessionLocal
-import os, time, httpx, sys
+import os, httpx
 
-# Dotenv, storage path connecting
-load_dotenv()
+# DB
+from db.db_ops import get_or_create_user
+from db.database import SessionLocal
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Utils
+from bot.utils.is_rate_limited import is_rate_limited
 
 # Define tokens
-TOKEN = os.getenv("TB_TOKEN")
-SERVER_URL = os.getenv('SERVER_URL')
-SERVER_NGROK = os.getenv('SERVER_NGROK')
+from core.config import BOT_TOKEN, SERVER_URL, OPENAI_API_KEY
 
 # TB App creating
-bot = Bot(TOKEN)
-app = Application.builder().token(TOKEN).build()
+bot = Bot(BOT_TOKEN)
+app = Application.builder().token(BOT_TOKEN).build()
 
-# Functions
-user_last_action = {}
-def is_rate_limited(user_id, cooldown=3):
-    now = time.time()
-    last = user_last_action.get(user_id, 0)
-    if now - last < cooldown:
-        return True
-    
-    user_last_action[user_id] = now
-    return False
-
-# Requests (functions in telegram)
+# Handlers
 async def start(update, context):
     if update.effective_chat.type != ChatType.PRIVATE:
         return
@@ -163,7 +148,6 @@ async def unknown(update, context):
         f"/terms — Terms & Policies\n\n"
         f"Or just describe your fantasy — I'll create a hot prompt right away! 🔥💦")
 
-# Requests (text in telegram)
 async def echo(update, context):
     # check if user in private chat
     if update.effective_chat.type != ChatType.PRIVATE:
@@ -200,7 +184,7 @@ async def echo(update, context):
         # request to GPT 4o-mini
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=OPENAI_API_KEY,
         )
         completion = client.chat.completions.create(
             extra_body={},
