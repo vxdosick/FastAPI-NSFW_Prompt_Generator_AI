@@ -2,7 +2,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters
 from telegram.constants import ChatType
 from telegram import Bot
 from openai import OpenAI
-import os, httpx
+import httpx
 
 # DB
 from db.db_ops import get_or_create_user
@@ -109,11 +109,11 @@ async def buy(update, context):
             f"Ready to unlock more spicy generations? 😏🔥\n\n"
             f"One simple purchase — no subscriptions, no hidden fees, no monthly traps.\n"
             f"Everything is transparent and honest 💎\n\n"
-            f"For just €1.99 you get 30 full generations!\n"
+            f"For just €1.99 you get 50 full generations!\n"
             f"That's less than a coffee ☕ — but way hotter and more satisfying 😉\n\n"
-            f"Pay once → instantly get your 30 generations added.\n"
+            f"Pay once → instantly get your 50 generations added.\n"
             f"As simple as that!\n\n"
-            f"<a href='{data['url']}'>🛒 Grab 30 generations for €1.99 now!</a>\n\n"
+            f"<a href='{data['url']}'>🛒 Grab 50 generations for €1.99 now!</a>\n\n"
             f"Let's keep the creativity flowing! 💦"
             ),
             parse_mode="HTML",
