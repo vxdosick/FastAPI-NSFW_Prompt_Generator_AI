@@ -53,7 +53,7 @@ async def create_checkout(user_id: str):
                 "product_data": {
                     "name": "50 Generations 🤗",
                 },
-                "unit_amount": 50,
+                "unit_amount": 199,
             },
             "quantity": 1,
         }],
